@@ -354,24 +354,38 @@
 
       // Trailing photos (anything after the last of the writing) are dropped
       // from the post itself — they still appear in the Photo Album below.
-      function lastMeaningful(el) {
-        var n = el.lastChild;
-        while (n && n.nodeType === 3 && !n.nodeValue.trim()) {
-          el.removeChild(n);
-          n = el.lastChild;
-        }
-        return n;
+      // Walk backwards through the very last node at any depth: Blogger leaves
+      // empty <p>, <br> and <span> wrappers after a block of photos, so we have
+      // to step past those too rather than stop at them.
+      function deepLast(root) {
+        var n = root;
+        while (n.lastChild) n = n.lastChild;
+        return n === root ? null : n;
       }
-      var node;
-      while ((node = lastMeaningful(d)) && node.nodeType === 1) {
-        var tag     = node.tagName.toLowerCase();
-        var hasText = node.textContent.replace(/[\s ]/g, '') !== '';
-        var hasImg  = tag === 'img' || !!node.querySelector('img');
-        if (tag === 'br' || tag === 'hr' || (hasImg && !hasText)) {
-          d.removeChild(node);
-        } else {
+      function blankText(n) {
+        return n.nodeType === 3 && !n.nodeValue.replace(/[\s\u00a0]/g, '');
+      }
+
+      var guard = 0;
+      while (guard++ < 1000) {
+        var n = deepLast(d);
+        if (!n) break;
+
+        // real writing — stop; everything above it stays in the post
+        if (n.nodeType === 3) {
+          if (blankText(n)) { n.parentNode.removeChild(n); continue; }
           break;
         }
+
+        if (n.nodeType === 1) {
+          var tag = n.tagName.toLowerCase();
+          // a photo, a spacer, or an emptied-out wrapper: drop it and keep going
+          if (tag === 'img' || tag === 'br' || tag === 'hr' || !n.firstChild) {
+            n.parentNode.removeChild(n);
+            continue;
+          }
+        }
+        break;
       }
 
       return {
