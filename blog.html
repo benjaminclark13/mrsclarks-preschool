@@ -90,13 +90,8 @@
       border-top: 1px solid rgba(110, 136, 116, .22);
     }
     .album-date {
-      margin: 0 0 2px;
-      font-size: 1.15rem;
-    }
-    .album-sub {
       margin: 0 0 16px;
-      color: var(--ink-soft, #5c6b60);
-      font-size: .92rem;
+      font-size: 1.15rem;
     }
     .album-grid {
       display: grid;
@@ -520,8 +515,7 @@
         var wrap = document.createElement('section');
         wrap.className = 'album-group';
         wrap.innerHTML =
-          '<h3 class="album-date">' + esc(group.date || group.title) + '</h3>' +
-          (group.date ? '<p class="album-sub">' + esc(group.title) + '</p>' : '');
+          '<h3 class="album-date">' + esc(group.date || group.title) + '</h3>';
 
         var grid = document.createElement('div');
         grid.className = 'album-grid';
