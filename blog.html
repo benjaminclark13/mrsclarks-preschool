@@ -84,6 +84,20 @@
     }
     .post-toggle:hover { text-decoration: underline; }
 
+    .album-group + .album-group {
+      margin-top: 34px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(110, 136, 116, .22);
+    }
+    .album-date {
+      margin: 0 0 2px;
+      font-size: 1.15rem;
+    }
+    .album-sub {
+      margin: 0 0 16px;
+      color: var(--ink-soft, #5c6b60);
+      font-size: .92rem;
+    }
     .album-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -227,9 +241,9 @@
       <div class="container">
         <div class="section-head">
           <h2>Photo Album</h2>
-          <p>Pictures from our classroom posts. Click any photo to see it larger.</p>
+          <p>Pictures from our classroom posts, grouped by the day they were shared. Click any photo to see it larger.</p>
         </div>
-        <div id="album" class="album-grid"></div>
+        <div id="album"></div>
         <p id="album-status" class="feed-note">Loading photos…</p>
       </div>
     </section>
@@ -287,7 +301,8 @@
     var album       = document.getElementById('album');
     var albumStatus = document.getElementById('album-status');
 
-    var photos = [];       // {src, caption}
+    var photos = [];       // flat list, newest post first — drives the lightbox
+    var groups = [];       // one per post that has photos: {date, title, start, count}
     var loaded = false;
 
     /* ---------- helpers ---------- */
@@ -424,10 +439,19 @@
         var text    = stripTags(body);
         var excerpt = text.length > EXCERPT ? text.slice(0, EXCERPT).replace(/\s+\S*$/, '') + '…' : text;
 
-        // collect photos for the album
+        // collect photos for the album, keeping each post's set together
+        var groupStart = photos.length;
         imgs.forEach(function (src) {
-          photos.push({ src: biggerImage(src, 's1600'), thumb: biggerImage(src, 's400'), caption: title });
+          photos.push({
+            src:     biggerImage(src, 's1600'),
+            thumb:   biggerImage(src, 's400'),
+            caption: title,
+            date:    date
+          });
         });
+        if (imgs.length) {
+          groups.push({ date: date, title: title, start: groupStart, count: imgs.length });
+        }
 
         var truncated = text.length > EXCERPT;
         var cleaned   = cleanBody(body);
@@ -492,13 +516,30 @@
       }
       albumStatus.hidden = true;
 
-      photos.forEach(function (photo, i) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.setAttribute('aria-label', 'View photo from "' + photo.caption + '"');
-        btn.innerHTML = '<img src="' + esc(photo.thumb) + '" alt="" loading="lazy">';
-        btn.addEventListener('click', function () { openLightbox(i); });
-        album.appendChild(btn);
+      groups.forEach(function (group) {
+        var wrap = document.createElement('section');
+        wrap.className = 'album-group';
+        wrap.innerHTML =
+          '<h3 class="album-date">' + esc(group.date || group.title) + '</h3>' +
+          (group.date ? '<p class="album-sub">' + esc(group.title) + '</p>' : '');
+
+        var grid = document.createElement('div');
+        grid.className = 'album-grid';
+
+        for (var n = 0; n < group.count; n++) {
+          (function (i) {
+            var photo = photos[i];
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.setAttribute('aria-label', 'View photo from "' + photo.caption + '"');
+            btn.innerHTML = '<img src="' + esc(photo.thumb) + '" alt="" loading="lazy">';
+            btn.addEventListener('click', function () { openLightbox(i); });
+            grid.appendChild(btn);
+          })(group.start + n);
+        }
+
+        wrap.appendChild(grid);
+        album.appendChild(wrap);
       });
     }
 
@@ -534,7 +575,7 @@
       var p = photos[current];
       lbImg.src = p.src;
       lbImg.alt = p.caption;
-      lbCaption.textContent = p.caption;
+      lbCaption.textContent = p.date ? p.caption + ' · ' + p.date : p.caption;
     }
 
     function step(n) {
