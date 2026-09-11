@@ -36,7 +36,9 @@
       box-shadow: var(--shadow-card, 0 6px 20px rgba(40,50,45,.08));
       padding: 20px;
     }
-    .post-item.no-thumb { grid-template-columns: 1fr; }
+    .post-item.no-thumb,
+    .post-item.open { grid-template-columns: 1fr; }
+    .post-item.open .post-thumb { display: none; }
     .post-thumb {
       width: 100%;
       aspect-ratio: 4/3;
@@ -57,7 +59,30 @@
     .post-item h3 { margin: 0 0 8px; }
     .post-item h3 a { text-decoration: none; }
     .post-excerpt { margin: 0 0 14px; color: var(--ink-soft, #5c6b60); }
-    .post-more { font-weight: 700; text-decoration: none; }
+
+    .post-body { margin: 0 0 16px; }
+    .post-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius-md, 12px);
+      display: block;
+      margin: 14px auto;
+      cursor: zoom-in;
+    }
+    .post-body a { overflow-wrap: break-word; }
+    .post-body iframe, .post-body video { max-width: 100%; }
+    .post-body table { display: block; overflow-x: auto; max-width: 100%; }
+
+    .post-toggle {
+      font: inherit;
+      font-weight: 700;
+      color: var(--terracotta, #c77357);
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+    .post-toggle:hover { text-decoration: underline; }
 
     .album-grid {
       display: grid;
@@ -195,10 +220,6 @@
         </div>
         <div id="post-list" class="post-list"></div>
         <p id="post-status" class="feed-note">Loading the latest posts…</p>
-
-        <div class="btn-row" style="margin-top:28px;">
-          <a class="btn" href="https://mrsclarkspreschoolblog.blogspot.com/" target="_blank" rel="noopener">Visit the Full Blog</a>
-        </div>
       </div>
     </section>
 
@@ -299,18 +320,44 @@
       }).filter(Boolean);
     }
 
+    // Build a safe, display-ready copy of the post body.
+    function cleanBody(html) {
+      var d = document.createElement('div');
+      d.innerHTML = html || '';
+      // drop anything executable or framed in from elsewhere
+      Array.prototype.forEach.call(
+        d.querySelectorAll('script, style, iframe, object, embed, form, input, link'),
+        function (el) { el.parentNode.removeChild(el); }
+      );
+      // strip inline event handlers and fixed sizing Blogger sometimes adds
+      Array.prototype.forEach.call(d.querySelectorAll('*'), function (el) {
+        Array.prototype.slice.call(el.attributes).forEach(function (attr) {
+          if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
+        });
+      });
+      // full-size images, opened in our own lightbox
+      Array.prototype.forEach.call(d.querySelectorAll('img'), function (img) {
+        var src = img.getAttribute('src');
+        if (src) img.setAttribute('src', biggerImage(src, 's1600'));
+        img.removeAttribute('width');
+        img.removeAttribute('height');
+        img.setAttribute('loading', 'lazy');
+      });
+      // unwrap Blogger's "click the photo" links so they don't navigate away
+      Array.prototype.forEach.call(d.querySelectorAll('a'), function (a) {
+        if (a.querySelector('img')) {
+          var parent = a.parentNode;
+          while (a.firstChild) parent.insertBefore(a.firstChild, a);
+          parent.removeChild(a);
+        }
+      });
+      return d.innerHTML;
+    }
+
     function prettyDate(iso) {
       var d = new Date(iso);
       if (isNaN(d)) return '';
       return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    }
-
-    function postLink(entry) {
-      var links = entry.link || [];
-      for (var i = 0; i < links.length; i++) {
-        if (links[i].rel === 'alternate') return links[i].href;
-      }
-      return BLOG_URL;
     }
 
     /* ---------- rendering ---------- */
@@ -330,7 +377,6 @@
       entries.forEach(function (entry) {
         var title   = (entry.title && entry.title.$t) || 'Untitled post';
         var body    = (entry.content && entry.content.$t) || (entry.summary && entry.summary.$t) || '';
-        var url     = postLink(entry);
         var date    = prettyDate(entry.published && entry.published.$t);
         var imgs    = imagesIn(body);
         var text    = stripTags(body);
@@ -341,18 +387,53 @@
           photos.push({ src: biggerImage(src, 's1600'), thumb: biggerImage(src, 's400'), caption: title });
         });
 
+        var truncated = text.length > EXCERPT;
+
         var item = document.createElement('article');
         item.className = 'post-item' + (imgs.length ? '' : ' no-thumb');
         item.innerHTML =
           (imgs.length
             ? '<img class="post-thumb" src="' + esc(biggerImage(imgs[0], 's400')) + '" alt="" loading="lazy">'
             : '') +
-          '<div>' +
+          '<div class="post-main">' +
             (date ? '<span class="post-date">' + esc(date) + '</span>' : '') +
-            '<h3><a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(title) + '</a></h3>' +
+            '<h3>' + esc(title) + '</h3>' +
             (excerpt ? '<p class="post-excerpt">' + esc(excerpt) + '</p>' : '') +
-            '<a class="post-more" href="' + esc(url) + '" target="_blank" rel="noopener">Read the full post →</a>' +
+            '<div class="post-body" hidden>' + cleanBody(body) + '</div>' +
+            '<button class="post-toggle" type="button">Read the full post ↓</button>' +
           '</div>';
+
+        var toggle  = item.querySelector('.post-toggle');
+        var bodyEl  = item.querySelector('.post-body');
+        var excEl   = item.querySelector('.post-excerpt');
+
+        // nothing hidden? then there is nothing to expand
+        if (!truncated && imgs.length === 0) {
+          toggle.hidden = true;
+          if (excEl) { excEl.hidden = true; }
+          bodyEl.hidden = false;
+          item.classList.add('open');
+        }
+
+        toggle.addEventListener('click', function () {
+          var open = !bodyEl.hidden;
+          bodyEl.hidden = open;
+          if (excEl) excEl.hidden = !open;
+          item.classList.toggle('open', !open);
+          toggle.textContent = open ? 'Read the full post ↓' : 'Show less ↑';
+          if (open) item.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        // photos inside the post open in the same lightbox
+        Array.prototype.forEach.call(bodyEl.querySelectorAll('img'), function (img) {
+          img.addEventListener('click', function () {
+            var i = photos.findIndex
+              ? photos.findIndex(function (p) { return p.src === img.getAttribute('src'); })
+              : -1;
+            if (i >= 0) openLightbox(i);
+          });
+        });
+
         postList.appendChild(item);
       });
 
@@ -378,9 +459,8 @@
 
     function failed() {
       if (loaded) return;
-      postStatus.innerHTML =
-        'We couldn\'t load the posts just now. ' +
-        '<a href="' + BLOG_URL + '" target="_blank" rel="noopener">Read the blog directly →</a>';
+      postStatus.textContent =
+        'We couldn\'t load the posts just now. Please refresh the page or check back a little later.';
       albumStatus.hidden = true;
     }
 
