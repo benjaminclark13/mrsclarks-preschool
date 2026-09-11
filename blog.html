@@ -48,16 +48,14 @@
       background: #eee;
     }
     .post-date {
-      display: inline-block;
-      font-size: .78rem;
+      display: block;
+      font-size: .9rem;
       font-weight: 700;
       letter-spacing: .06em;
       text-transform: uppercase;
       color: var(--terracotta, #c77357);
-      margin-bottom: 6px;
+      margin-bottom: 10px;
     }
-    .post-item h3 { margin: 0 0 8px; }
-    .post-item h3 a { text-decoration: none; }
     .post-excerpt { margin: 0 0 14px; color: var(--ink-soft, #5c6b60); }
 
     .post-body { margin: 0 0 16px; }
@@ -461,7 +459,6 @@
             : '') +
           '<div class="post-main">' +
             (date ? '<span class="post-date">' + esc(date) + '</span>' : '') +
-            '<h3>' + esc(title) + '</h3>' +
             (excerpt ? '<p class="post-excerpt">' + esc(excerpt) + '</p>' : '') +
             '<div class="post-body" hidden>' + cleaned.html + '</div>' +
             '<button class="post-toggle" type="button">Read the full post ↓</button>' +
@@ -569,7 +566,7 @@
       var p = photos[current];
       lbImg.src = p.src;
       lbImg.alt = p.caption;
-      lbCaption.textContent = p.date ? p.caption + ' · ' + p.date : p.caption;
+      lbCaption.textContent = p.date || '';
     }
 
     function step(n) {
