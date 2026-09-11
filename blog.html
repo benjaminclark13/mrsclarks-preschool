@@ -351,7 +351,35 @@
           parent.removeChild(a);
         }
       });
-      return d.innerHTML;
+
+      // Trailing photos (anything after the last of the writing) are dropped
+      // from the post itself — they still appear in the Photo Album below.
+      function lastMeaningful(el) {
+        var n = el.lastChild;
+        while (n && n.nodeType === 3 && !n.nodeValue.trim()) {
+          el.removeChild(n);
+          n = el.lastChild;
+        }
+        return n;
+      }
+      var node;
+      while ((node = lastMeaningful(d)) && node.nodeType === 1) {
+        var tag     = node.tagName.toLowerCase();
+        var hasText = node.textContent.replace(/[\s ]/g, '') !== '';
+        var hasImg  = tag === 'img' || !!node.querySelector('img');
+        if (tag === 'br' || tag === 'hr' || (hasImg && !hasText)) {
+          d.removeChild(node);
+        } else {
+          break;
+        }
+      }
+
+      return {
+        html: d.innerHTML,
+        images: Array.prototype.map.call(d.querySelectorAll('img'), function (img) {
+          return img.getAttribute('src');
+        }).filter(Boolean)
+      };
     }
 
     function prettyDate(iso) {
@@ -388,18 +416,21 @@
         });
 
         var truncated = text.length > EXCERPT;
+        var cleaned   = cleanBody(body);
+        var shown     = cleaned.images;          // photos that stay in the post
+        var thumb     = shown.length ? shown[0] : null;
 
         var item = document.createElement('article');
-        item.className = 'post-item' + (imgs.length ? '' : ' no-thumb');
+        item.className = 'post-item' + (thumb ? '' : ' no-thumb');
         item.innerHTML =
-          (imgs.length
-            ? '<img class="post-thumb" src="' + esc(biggerImage(imgs[0], 's400')) + '" alt="" loading="lazy">'
+          (thumb
+            ? '<img class="post-thumb" src="' + esc(biggerImage(thumb, 's400')) + '" alt="" loading="lazy">'
             : '') +
           '<div class="post-main">' +
             (date ? '<span class="post-date">' + esc(date) + '</span>' : '') +
             '<h3>' + esc(title) + '</h3>' +
             (excerpt ? '<p class="post-excerpt">' + esc(excerpt) + '</p>' : '') +
-            '<div class="post-body" hidden>' + cleanBody(body) + '</div>' +
+            '<div class="post-body" hidden>' + cleaned.html + '</div>' +
             '<button class="post-toggle" type="button">Read the full post ↓</button>' +
           '</div>';
 
@@ -408,7 +439,7 @@
         var excEl   = item.querySelector('.post-excerpt');
 
         // nothing hidden? then there is nothing to expand
-        if (!truncated && imgs.length === 0) {
+        if (!truncated && shown.length === 0) {
           toggle.hidden = true;
           if (excEl) { excEl.hidden = true; }
           bodyEl.hidden = false;
