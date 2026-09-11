@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9L7TG3CD97"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-9L7TG3CD97');
+  </script>
+
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌈</text></svg>'>
+  <meta name="theme-color" content="#6e8874">
+  <title>Class Blog | Mrs. Clark's Pre-K Class — Room A108</title>
+  <meta name="description" content="Classroom blog and photo album for Mrs. Clark's Pre-K class, Room A108, Cambridge Elementary School.">
+  <meta name="robots" content="noindex, nofollow, noarchive, noimageindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Playfair+Display:ital,wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+
+  <style>
+    /* ---- Blog page only ---- */
+    .post-list { display: grid; gap: 24px; }
+    .post-item {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 22px;
+      align-items: start;
+      background: var(--white, #fff);
+      border-radius: var(--radius-lg, 18px);
+      box-shadow: var(--shadow-card, 0 6px 20px rgba(40,50,45,.08));
+      padding: 20px;
+    }
+    .post-item.no-thumb { grid-template-columns: 1fr; }
+    .post-thumb {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      border-radius: var(--radius-md, 12px);
+      display: block;
+      background: #eee;
+    }
+    .post-date {
+      display: inline-block;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--terracotta, #c77357);
+      margin-bottom: 6px;
+    }
+    .post-item h3 { margin: 0 0 8px; }
+    .post-item h3 a { text-decoration: none; }
+    .post-excerpt { margin: 0 0 14px; color: var(--ink-soft, #5c6b60); }
+    .post-more { font-weight: 700; text-decoration: none; }
+
+    .album-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    .album-grid button {
+      padding: 0;
+      border: 0;
+      background: none;
+      cursor: zoom-in;
+      border-radius: var(--radius-md, 12px);
+      overflow: hidden;
+      line-height: 0;
+      box-shadow: var(--shadow-card, 0 6px 20px rgba(40,50,45,.08));
+    }
+    .album-grid img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      display: block;
+      transition: transform .25s ease;
+      background: #eee;
+    }
+    .album-grid button:hover img,
+    .album-grid button:focus-visible img { transform: scale(1.05); }
+
+    .feed-note {
+      text-align: center;
+      color: var(--ink-soft, #5c6b60);
+      padding: 28px 8px;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(28, 34, 30, .92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 24px;
+    }
+    .lightbox[hidden] { display: none; }
+    .lightbox img {
+      max-width: 100%;
+      max-height: 82vh;
+      border-radius: var(--radius-md, 12px);
+      box-shadow: 0 10px 40px rgba(0,0,0,.5);
+    }
+    .lb-caption {
+      position: absolute;
+      bottom: 18px;
+      left: 0; right: 0;
+      text-align: center;
+      color: #f3efe6;
+      font-size: .9rem;
+      padding: 0 60px;
+    }
+    .lb-btn {
+      position: absolute;
+      background: rgba(255,255,255,.14);
+      color: #fff;
+      border: 0;
+      border-radius: 999px;
+      width: 46px; height: 46px;
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .lb-btn:hover { background: rgba(255,255,255,.28); }
+    .lb-close { top: 18px; right: 18px; }
+    .lb-prev { left: 18px; top: 50%; transform: translateY(-50%); }
+    .lb-next { right: 18px; top: 50%; transform: translateY(-50%); }
+
+    @media (max-width: 680px) {
+      .post-item { grid-template-columns: 1fr; }
+      .album-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+      .lb-caption { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="nav-bar">
+      <a class="brand" href="index.html">
+        <span class="brand-badge" aria-hidden="true"><img src="assets/img/cambridge-cougar-logo.png" alt="Cambridge Elementary Cougars logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></span>
+        <span class="brand-text">
+          <span class="brand-title">Mrs. Clark's Pre-K Class</span>
+          <span class="brand-sub">Room A108 · Cambridge Elementary School</span>
+        </span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰ Menu</button>
+      <nav class="main-nav" aria-label="Primary">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About the Teacher</a></li>
+          <li><a href="school-hours.html">School Hours</a></li>
+          <li><a href="dates-reminders.html">Dates &amp; Reminders</a></li>
+          <li><a href="blog.html">Blog</a></li>
+          <li><a href="contact.html">Contact Info</a></li>
+          <li><a href="resources.html">Resources</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <section class="page-hero hero">
+      <svg class="rainbow-deco" viewBox="0 0 120 70" width="72" height="42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <path d="M8 64 A52 52 0 0 1 112 64" fill="none" stroke="#c77357" stroke-width="10" stroke-linecap="round"/>
+        <path d="M20 64 A40 40 0 0 1 100 64" fill="none" stroke="#e2ae52" stroke-width="10" stroke-linecap="round"/>
+        <path d="M32 64 A28 28 0 0 1 88 64" fill="none" stroke="#5f8fa6" stroke-width="10" stroke-linecap="round"/>
+      </svg>
+      <div class="hero-inner">
+        <span class="eyebrow">Our Classroom</span>
+        <h1>Class Blog</h1>
+        <p class="lead">A peek at what we've been learning, making, and celebrating in Room A108.</p>
+      </div>
+      <div class="hero-wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,32 C240,80 480,0 720,24 C960,48 1200,88 1440,40 L1440,80 L0,80 Z" fill="#f8f4ea"></path>
+        </svg>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" style="max-width:900px;">
+        <div class="section-head">
+          <h2>Latest Posts</h2>
+        </div>
+        <div id="post-list" class="post-list"></div>
+        <p id="post-status" class="feed-note">Loading the latest posts…</p>
+
+        <div class="btn-row" style="margin-top:28px;">
+          <a class="btn" href="https://mrsclarkspreschoolblog.blogspot.com/" target="_blank" rel="noopener">Visit the Full Blog</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="container">
+        <div class="section-head">
+          <h2>Photo Album</h2>
+          <p>Pictures from our classroom posts. Click any photo to see it larger.</p>
+        </div>
+        <div id="album" class="album-grid"></div>
+        <p id="album-status" class="feed-note">Loading photos…</p>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" hidden>
+    <button class="lb-btn lb-close" id="lb-close" aria-label="Close">&times;</button>
+    <button class="lb-btn lb-prev" id="lb-prev" aria-label="Previous photo">&#8249;</button>
+    <img id="lb-img" src="" alt="">
+    <button class="lb-btn lb-next" id="lb-next" aria-label="Next photo">&#8250;</button>
+    <div class="lb-caption" id="lb-caption"></div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>Mrs. Clark's Pre-K Class</h4>
+        <p style="color:#d7e4d9; margin:0;">Room A108<br>Cambridge Elementary School<br>South Brunswick School District</p>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:andrea.clark@sbschools.org">andrea.clark@sbschools.org</a>
+        <a href="tel:+17322972941">(732) 297-2941</a>
+        <a href="contact.html">Full contact info →</a>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="index.html">Home</a>
+        <a href="about.html">About the Teacher</a>
+        <a href="school-hours.html">School Hours</a>
+        <a href="dates-reminders.html">Dates &amp; Reminders</a>
+        <a href="contact.html">Contact Info</a>
+        <a href="resources.html">Resources</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; <span id="year"></span> Mrs. Clark's Pre-K Class — Room A108, Cambridge Elementary School.
+    </div>
+  </footer>
+
+  <script src="assets/main.js"></script>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var BLOG_URL  = 'https://mrsclarkspreschoolblog.blogspot.com';
+    var MAX_POSTS = 100;   // posts to read from the feed
+    var EXCERPT   = 220;   // characters of preview text
+
+    var postList    = document.getElementById('post-list');
+    var postStatus  = document.getElementById('post-status');
+    var album       = document.getElementById('album');
+    var albumStatus = document.getElementById('album-status');
+
+    var photos = [];       // {src, caption}
+    var loaded = false;
+
+    /* ---------- helpers ---------- */
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+      });
+    }
+
+    function stripTags(html) {
+      var d = document.createElement('div');
+      d.innerHTML = html || '';
+      return (d.textContent || '').replace(/\s+/g, ' ').trim();
+    }
+
+    // Blogger serves sized copies like .../s320/photo.jpg — ask for a bigger one.
+    function biggerImage(url, size) {
+      return String(url)
+        .replace(/\/s\d+(-c)?\//, '/' + size + '/')
+        .replace(/\/w\d+-h\d+(-[a-z-]+)?\//, '/' + size + '/')
+        .replace(/=s\d+(-c)?$/, '=' + size);
+    }
+
+    function imagesIn(html) {
+      var d = document.createElement('div');
+      d.innerHTML = html || '';
+      return Array.prototype.map.call(d.querySelectorAll('img'), function (img) {
+        return img.getAttribute('src');
+      }).filter(Boolean);
+    }
+
+    function prettyDate(iso) {
+      var d = new Date(iso);
+      if (isNaN(d)) return '';
+      return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
+    function postLink(entry) {
+      var links = entry.link || [];
+      for (var i = 0; i < links.length; i++) {
+        if (links[i].rel === 'alternate') return links[i].href;
+      }
+      return BLOG_URL;
+    }
+
+    /* ---------- rendering ---------- */
+
+    function render(json) {
+      loaded = true;
+      var entries = (json && json.feed && json.feed.entry) || [];
+
+      if (!entries.length) {
+        postStatus.textContent = 'No posts yet — check back soon!';
+        albumStatus.textContent = 'Photos will appear here as classroom posts are added.';
+        return;
+      }
+
+      postStatus.hidden = true;
+
+      entries.forEach(function (entry) {
+        var title   = (entry.title && entry.title.$t) || 'Untitled post';
+        var body    = (entry.content && entry.content.$t) || (entry.summary && entry.summary.$t) || '';
+        var url     = postLink(entry);
+        var date    = prettyDate(entry.published && entry.published.$t);
+        var imgs    = imagesIn(body);
+        var text    = stripTags(body);
+        var excerpt = text.length > EXCERPT ? text.slice(0, EXCERPT).replace(/\s+\S*$/, '') + '…' : text;
+
+        // collect photos for the album
+        imgs.forEach(function (src) {
+          photos.push({ src: biggerImage(src, 's1600'), thumb: biggerImage(src, 's400'), caption: title });
+        });
+
+        var item = document.createElement('article');
+        item.className = 'post-item' + (imgs.length ? '' : ' no-thumb');
+        item.innerHTML =
+          (imgs.length
+            ? '<img class="post-thumb" src="' + esc(biggerImage(imgs[0], 's400')) + '" alt="" loading="lazy">'
+            : '') +
+          '<div>' +
+            (date ? '<span class="post-date">' + esc(date) + '</span>' : '') +
+            '<h3><a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(title) + '</a></h3>' +
+            (excerpt ? '<p class="post-excerpt">' + esc(excerpt) + '</p>' : '') +
+            '<a class="post-more" href="' + esc(url) + '" target="_blank" rel="noopener">Read the full post →</a>' +
+          '</div>';
+        postList.appendChild(item);
+      });
+
+      renderAlbum();
+    }
+
+    function renderAlbum() {
+      if (!photos.length) {
+        albumStatus.textContent = 'Photos will appear here as classroom posts are added.';
+        return;
+      }
+      albumStatus.hidden = true;
+
+      photos.forEach(function (photo, i) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'View photo from "' + photo.caption + '"');
+        btn.innerHTML = '<img src="' + esc(photo.thumb) + '" alt="" loading="lazy">';
+        btn.addEventListener('click', function () { openLightbox(i); });
+        album.appendChild(btn);
+      });
+    }
+
+    function failed() {
+      if (loaded) return;
+      postStatus.innerHTML =
+        'We couldn\'t load the posts just now. ' +
+        '<a href="' + BLOG_URL + '" target="_blank" rel="noopener">Read the blog directly →</a>';
+      albumStatus.hidden = true;
+    }
+
+    /* ---------- lightbox ---------- */
+
+    var lb        = document.getElementById('lightbox');
+    var lbImg     = document.getElementById('lb-img');
+    var lbCaption = document.getElementById('lb-caption');
+    var current   = 0;
+
+    function openLightbox(i) {
+      current = i;
+      show();
+      lb.hidden = false;
+      document.body.style.overflow = 'hidden';
+      document.getElementById('lb-close').focus();
+    }
+
+    function closeLightbox() {
+      lb.hidden = true;
+      lbImg.src = '';
+      document.body.style.overflow = '';
+    }
+
+    function show() {
+      var p = photos[current];
+      lbImg.src = p.src;
+      lbImg.alt = p.caption;
+      lbCaption.textContent = p.caption;
+    }
+
+    function step(n) {
+      current = (current + n + photos.length) % photos.length;
+      show();
+    }
+
+    document.getElementById('lb-close').addEventListener('click', closeLightbox);
+    document.getElementById('lb-prev').addEventListener('click', function () { step(-1); });
+    document.getElementById('lb-next').addEventListener('click', function () { step(1); });
+    lb.addEventListener('click', function (e) { if (e.target === lb) closeLightbox(); });
+    document.addEventListener('keydown', function (e) {
+      if (lb.hidden) return;
+      if (e.key === 'Escape')     closeLightbox();
+      if (e.key === 'ArrowLeft')  step(-1);
+      if (e.key === 'ArrowRight') step(1);
+    });
+
+    /* ---------- load the feed ---------- */
+
+    window.__mrsClarkBlogFeed = render;
+
+    var s = document.createElement('script');
+    s.src = BLOG_URL + '/feeds/posts/default?alt=json-in-script&max-results=' +
+            MAX_POSTS + '&callback=__mrsClarkBlogFeed';
+    s.onerror = failed;
+    document.head.appendChild(s);
+    setTimeout(failed, 12000);
+  })();
+  </script>
+</body>
+</html>
