@@ -289,6 +289,11 @@
     var MAX_POSTS = 100;   // posts to read from the feed
     var EXCERPT   = 220;   // characters of preview text
 
+    // Posts published on or before this date keep photos that sit inside the
+    // writing; anything published after it shows no photos in the post at all —
+    // every picture lives in the Photo Album below instead.
+    var LAST_DAY_WITH_INLINE_PHOTOS = '2026-09-11';
+
     var postList    = document.getElementById('post-list');
     var postStatus  = document.getElementById('post-status');
     var album       = document.getElementById('album');
@@ -328,8 +333,15 @@
       }).filter(Boolean);
     }
 
+    function prettyDate(iso) {
+      var d = new Date(iso);
+      if (isNaN(d)) return '';
+      return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
     // Build a safe, display-ready copy of the post body.
-    function cleanBody(html) {
+    // stripAllImages = drop every photo; otherwise only the trailing block goes.
+    function cleanBody(html, stripAllImages) {
       var d = document.createElement('div');
       d.innerHTML = html || '';
       // drop anything executable or framed in from elsewhere
@@ -360,6 +372,13 @@
         }
       });
 
+      // Newer posts: no photos in the post body at all.
+      if (stripAllImages) {
+        Array.prototype.forEach.call(d.querySelectorAll('img'), function (img) {
+          img.parentNode.removeChild(img);
+        });
+      }
+
       // Trailing photos (anything after the last of the writing) are dropped
       // from the post itself — they still appear in the Photo Album below.
       // Walk backwards through the very last node at any depth: Blogger leaves
@@ -371,7 +390,7 @@
         return n === root ? null : n;
       }
       function blankText(n) {
-        return n.nodeType === 3 && !n.nodeValue.replace(/[\s\u00a0]/g, '');
+        return n.nodeType === 3 && !n.nodeValue.replace(/[\s ]/g, '');
       }
 
       var guard = 0;
@@ -404,12 +423,6 @@
       };
     }
 
-    function prettyDate(iso) {
-      var d = new Date(iso);
-      if (isNaN(d)) return '';
-      return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    }
-
     /* ---------- rendering ---------- */
 
     function render(json) {
@@ -427,10 +440,14 @@
       entries.forEach(function (entry) {
         var title   = (entry.title && entry.title.$t) || 'Untitled post';
         var body    = (entry.content && entry.content.$t) || (entry.summary && entry.summary.$t) || '';
-        var date    = prettyDate(entry.published && entry.published.$t);
+        var iso     = (entry.published && entry.published.$t) || '';
+        var date    = prettyDate(iso);
         var imgs    = imagesIn(body);
         var text    = stripTags(body);
         var excerpt = text.length > EXCERPT ? text.slice(0, EXCERPT).replace(/\s+\S*$/, '') + '…' : text;
+
+        // photos stay in the writing only for the older posts
+        var stripAllImages = iso.slice(0, 10) > LAST_DAY_WITH_INLINE_PHOTOS;
 
         // collect photos for the album, keeping each post's set together
         var groupStart = photos.length;
@@ -447,7 +464,7 @@
         }
 
         var truncated = text.length > EXCERPT;
-        var cleaned   = cleanBody(body);
+        var cleaned   = cleanBody(body, stripAllImages);
         var shown     = cleaned.images;          // photos that stay in the post
         var thumb     = shown.length ? shown[0] : null;
 
