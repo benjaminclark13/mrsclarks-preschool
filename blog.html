@@ -82,6 +82,18 @@
     }
     .post-toggle:hover { text-decoration: underline; }
 
+    .post-note {
+      margin: 14px 0 0;
+      font-size: .92rem;
+    }
+    .post-note a {
+      color: var(--sage, #6e8874);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .post-note a:hover,
+    .post-note a:focus-visible { text-decoration: underline; }
+
     .album-group + .album-group {
       margin-top: 34px;
       padding-top: 30px;
@@ -451,6 +463,7 @@
 
         // collect photos for the album, keeping each post's set together
         var groupStart = photos.length;
+        var groupIndex = imgs.length ? groups.length : -1;
         imgs.forEach(function (src) {
           photos.push({
             src:     biggerImage(src, 's1600'),
@@ -479,6 +492,10 @@
             (excerpt ? '<p class="post-excerpt">' + esc(excerpt) + '</p>' : '') +
             '<div class="post-body" hidden>' + cleaned.html + '</div>' +
             '<button class="post-toggle" type="button">Read the full post ↓</button>' +
+            (groupIndex >= 0
+              ? '<p class="post-note"><a href="#album-' + groupIndex + '">' +
+                '📷 Photos from this post are in the Photo Album below</a></p>'
+              : '') +
           '</div>';
 
         var toggle  = item.querySelector('.post-toggle');
@@ -512,6 +529,17 @@
           });
         });
 
+        // the note scrolls down to this post's own section of the album
+        var note = item.querySelector('.post-note a');
+        if (note) {
+          note.addEventListener('click', function (e) {
+            var target = document.getElementById('album-' + groupIndex);
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        }
+
         postList.appendChild(item);
       });
 
@@ -525,9 +553,10 @@
       }
       albumStatus.hidden = true;
 
-      groups.forEach(function (group) {
+      groups.forEach(function (group, index) {
         var wrap = document.createElement('section');
         wrap.className = 'album-group';
+        wrap.id = 'album-' + index;
         wrap.innerHTML =
           '<h3 class="album-date">' + esc(group.date || group.title) + '</h3>';
 
